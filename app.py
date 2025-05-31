@@ -1,78 +1,63 @@
 import streamlit as st
-import time
+import pandas as pd
 import random
+import time
+from opengateway_api import verify_number
 
 st.set_page_config(page_title="Trustify", layout="centered")
 st.title("Trustify")
-st.caption("Intellectual property and originality verifier")
+st.caption("AI-based trust & originality filter for digital content")
 
-st.subheader("Submit your work")
+# ---- Identity Verification via SMS ----
+st.subheader("Identity Verification (Required)")
 
-uploaded_file = st.file_uploader("Upload a file (image, audio, document, etc.)", type=None)
-input_url = st.text_input("Or paste a link (GitHub, YouTube, SoundCloud...):")
+if 'verification_passed' not in st.session_state:
+    st.session_state.verification_passed = False
 
-if st.button("Analyze"):
-    if uploaded_file or input_url:
-        with st.spinner("Searching for similar content in trusted databases..."):
-            time.sleep(3)  # simulate processing
+phone_number = st.text_input("📱 Phone number (e.g. +34612345678):")
 
-            # Generate a float between 1.5 and 4.5 with one decimal
-            rating = round(random.uniform(1.5, 4.5), 1)
-
-            comments = [
-                "Some content similarities detected with existing works.",
-                "Moderately original, though parts may resemble known sources.",
-                "Above average uniqueness with minor resemblances.",
-                "Good originality, limited similarity to known works.",
-                "Substantial uniqueness, but not entirely distinctive."
-            ]
-
-            # Choose comment based on rating scale
-            if rating < 2.0:
-                comment = comments[0]
-            elif rating < 2.8:
-                comment = comments[1]
-            elif rating < 3.5:
-                comment = comments[2]
-            elif rating < 4.2:
-                comment = comments[3]
-            else:
-                comment = comments[4]
-
-            st.success("Analysis complete")
-            st.metric("Originality Score", f"{rating}/5")
-            st.info(comment)
-
-            if uploaded_file:
-                st.write("Submitted file:")
-                st.write(f"Name: {uploaded_file.name}")
-            if input_url:
-                st.write("Submitted link:")
-                st.write(input_url)
-    else:
-        st.warning("Please upload a file or provide a link.")
-
-st.subheader("Optional Identity Verification")
-
-phone_number = st.text_input("Phone number (international format, e.g. +34612345678):")
-full_name = st.text_input("Full name (for KYC match):")
-
-if st.button("Verify Identity"):
-    if phone_number and full_name:
-        with st.spinner("Verifying identity using Open Gateway APIs..."):
+if st.button("Verify via SMS"):
+    if phone_number:
+        with st.spinner("Sending verification request via SMS..."):
             try:
-                from opengateway_api import verify_number, verify_identity
-
-                number_info = verify_number(phone_number)
-                identity_match = verify_identity(full_name)
-
-                st.success("Verification results:")
-                st.json({
-                    "Number Verification": number_info,
-                    "KYC Match": identity_match
-                })
-
+                result = verify_number(phone_number)
+                st.success("✅ Number Verified")
+                st.json(result)
+                st.session_state.verification_passed = True
             except Exception as e:
-                st.error(f"Verification failed: {e}")
+                st.error(f"❌ Verification failed: {e}")
+                st.session_state.verification_passed = False
     else:
-        st.warning("Please enter both phone number and full name.")
+        st.warning("Please enter a phone number to continue.")
+
+# ---- Content Submission ----
+if st.session_state.verification_passed:
+    st.subheader("Submit Content for Trust Check")
+
+    url_input = st.text_input("Paste a URL (YouTube, SoundCloud, GitHub, etc.):")
+    uploaded_file = st.file_uploader("Or upload a file (image, audio, etc.):", type=["mp3", "wav", "png", "jpg", "pdf", "zip"])
+
+    if st.button("Run Trustify Check"):
+        if not url_input and not uploaded_file:
+            st.warning("Please upload a file or paste a URL.")
+        else:
+            with st.spinner("Analyzing for originality and trust..."):
+                time.sleep(3)  # simulate processing time
+                score = round(random.uniform(1.7, 4.8), 1)  # evitar extremos 0 y 5
+                verdict = ""
+
+                if score < 2.0:
+                    verdict = "⚠️ High risk of plagiarism or duplication."
+                elif score < 3.5:
+                    verdict = "⚠️ Partial similarity to known content."
+                else:
+                    verdict = "✅ High originality detected."
+
+                st.subheader("Results")
+                st.metric(label="Originality Score (0–5)", value=score)
+                st.write(verdict)
+
+                if uploaded_file:
+                    st.info(f"File submitted: `{uploaded_file.name}`")
+                if url_input:
+                    st.info(f"URL submitted: {url_input}")

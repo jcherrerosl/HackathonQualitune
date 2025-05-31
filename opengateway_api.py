@@ -1,45 +1,34 @@
-import os
-import requests
+import time
 
-client_id = os.getenv("OPEN_GATEWAY_CLIENT_ID")
-client_secret = os.getenv("OPEN_GATEWAY_CLIENT_SECRET")
-callback_url = os.getenv("OPEN_GATEWAY_CALLBACK_URL")
-enduser_id = os.getenv("OPEN_GATEWAY_ENDUSER_ID")
-
-def get_token():
-    url = "https://api.dte.open-gateway.dev/token"
-    payload = {
-        "client_id": client_id,
-        "client_secret": client_secret,
-        "grant_type": "client_credentials"
+def verify_number(phone_number):
+    """Finge verificación del número usando Open Gateway."""
+    time.sleep(1)  # Simula latencia de red
+    return {
+        "status": "VERIFIED",
+        "number": phone_number,
+        "carrier": "FakeTel",
+        "country": "ES",
+        "line_type": "mobile",
+        "verified_via": "SMS"
     }
-    response = requests.post(url, data=payload)
-    return response.json()["access_token"]
-
-def verify_number(phone):
-    token = get_token()
-    url = "https://api.dte.open-gateway.dev/dpv/number-verification/v1/verify"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-        "x-end-user-id": enduser_id,
-    }
-    data = {
-        "phoneNumber": phone
-    }
-    response = requests.post(url, json=data, headers=headers)
-    return response.json()
 
 def verify_identity(full_name):
-    token = get_token()
-    url = "https://api.dte.open-gateway.dev/dpv/kyc-match/v1/match"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-        "x-end-user-id": enduser_id,
+    """Finge verificación de identidad por nombre completo."""
+    time.sleep(1)  # Simula latencia
+    return {
+        "match": True,
+        "full_name": full_name,
+        "confidence_score": 0.91,
+        "source": "Fake Identity DB"
     }
-    data = {
-        "fullName": full_name
+
+def verify_number_real(phone_number):
+    """Finge verificación real por SMS."""
+    time.sleep(1.5)
+    return {
+        "status": "VERIFIED",
+        "number": phone_number,
+        "method": "sms_code",
+        "timestamp": "2025-05-31T23:59:59Z",
+        "session": "fake-session-id"
     }
-    response = requests.post(url, json=data, headers=headers)
-    return response.json()

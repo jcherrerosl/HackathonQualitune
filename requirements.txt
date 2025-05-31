@@ -4,3 +4,4 @@ numpy
 pandas
 pyloudnorm
 scipy
+python-dotenv
