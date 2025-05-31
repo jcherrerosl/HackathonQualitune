@@ -83,3 +83,28 @@ if input_url:
 
         except Exception as e:
             st.error(f"Error during analysis: {e}")
+
+st.subheader("Optional Identity Verification")
+
+phone_number = st.text_input("Phone number (international format, e.g. +34612345678):")
+full_name = st.text_input("Full name (for KYC match):")
+
+if st.button("Verify Identity"):
+    if phone_number and full_name:
+        with st.spinner("Verifying identity..."):
+            try:
+                from opengateway_api import verify_number, verify_identity
+
+                number_info = verify_number(phone_number)
+                identity_match = verify_identity(full_name)
+
+                st.success("Verification results:")
+                st.json({
+                    "Number Verification": number_info,
+                    "KYC Match": identity_match
+                })
+
+            except Exception as e:
+                st.error(f"Verification failed: {e}")
+    else:
+        st.warning("Please enter both phone number and full name.")
