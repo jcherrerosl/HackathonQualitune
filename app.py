@@ -44,7 +44,7 @@ if st.session_state.verification_passed:
         else:
             with st.spinner("Analyzing for originality and trust..."):
                 time.sleep(3)  # simulate processing time
-                score = round(random.uniform(1.2, 3.7), 1)  # evitar extremos 0 y 5
+                score = round(random.uniform(1.2, 2.1), 1)  # evitar extremos 0 y 5
                 verdict = ""
 
                 if score < 2.0:
