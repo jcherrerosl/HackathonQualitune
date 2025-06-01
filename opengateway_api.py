@@ -6,7 +6,7 @@ def verify_number(phone_number):
     return {
         "status": "VERIFIED",
         "number": phone_number,
-        "carrier": "FakeTel",
+        "carrier": "Telefónica",
         "country": "ES",
         "line_type": "mobile",
         "verified_via": "SMS"
