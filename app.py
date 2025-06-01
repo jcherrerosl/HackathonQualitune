@@ -42,7 +42,7 @@ if st.session_state.verification_passed:
             st.warning("Please upload a file or paste a URL.")
         else:
             with st.spinner("Analyzing for originality and trust..."):
-                time.sleep(3)  # simulate processing time
+                time.sleep(7)  # simulate processing time
                 score = round(random.uniform(1.7, 4.8), 1)  # evitar extremos 0 y 5
                 verdict = ""
 
